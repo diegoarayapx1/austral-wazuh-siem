@@ -1,0 +1,72 @@
+<group name="local,sysmon,powershell,">
+  <rule id="100210" level="12">
+    <if_sid>92027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(IEX|Invoke-Expression)</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(DownloadString|DownloadFile|DownloadData|Net\.WebClient|Invoke-WebRequest|Invoke-RestMethod|\biwr\b|\bwget\b|\bcurl\b)</field>
+    <description>PowerShell download cradle: descarga y ejecucion en memoria (IEX + descarga remota) - T1059.001</description>
+    <mitre>
+      <id>T1059.001</id>
+    </mitre>
+    <group>attack,powershell_cradle,</group>
+  </rule>
+</group>
+
+<group name="local,tuning,">
+  <rule id="100211" level="0">
+    <if_sid>92213</if_sid>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)__PSScriptPolicyTest_</field>
+    <description>PowerShell script policy test file (benigno) - FP conocido de la regla 92213</description>
+    <group>tuning,false_positive,</group>
+  </rule>
+
+  <rule id="100212" level="0">
+    <if_sid>92213</if_sid>
+    <field name="win.eventdata.image">cleanmgr.exe</field>
+    <field name="win.eventdata.targetFilename">WimProvider.dll</field>
+    <description>Tuning FP: cleanmgr.exe soltando WimProvider.dll (componente legitimo de Disk Cleanup) - no es drop malicioso</description>
+    <group>tuning,false_positive,</group>
+  </rule>
+</group>
+
+<group name="local,syslog,sshd,">
+  <rule id="100220" level="12" frequency="4" timeframe="120">
+    <if_matched_sid>5760</if_matched_sid>
+    <if_sid>5715</if_sid>
+    <same_srcip />
+    <description>SSH: login exitoso precedido de multiples fallos desde la misma IP (brute force exitoso) - T1110.001 / T1078</description>
+    <mitre>
+      <id>T1110.001</id>
+      <id>T1078</id>
+    </mitre>
+    <group>attack,authentication_success,brute_force_success,</group>
+  </rule>
+</group>
+
+<group name="local,syslog,sshd,">
+  <rule id="100230" level="12">
+    <if_sid>5715</if_sid>
+    <srcip>192.168.1.100</srcip>
+    <description>SSH: login exitoso desde IP no confiable - acceso con credencial valida desde origen ilegitimo - T1078</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>attack,valid_accounts,untrusted_source,</group>
+  </rule>
+</group>
+
+<!--
+  PUNTO DE INTEGRACION - Threat Intel (se activa en el Proyecto 4).
+  Regla preparada para consultar la CDB list malicious-ips, que se poblara con
+  IOCs enriquecidos desde n8n. Descomentar y validar cuando la lista tenga datos.
+
+  <group name="local,threat_intel,">
+    <rule id="100240" level="12">
+      <if_sid>5715</if_sid>
+      <list field="srcip" lookup="address_match_key">etc/lists/malicious-ips</list>
+      <description>SSH: acceso desde IP en lista de threat intel (CDB) - T1078</description>
+      <mitre>
+        <id>T1078</id>
+      </mitre>
+    </rule>
+  </group>
+-->

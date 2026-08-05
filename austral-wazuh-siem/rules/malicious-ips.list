@@ -1,0 +1,5 @@
+# CDB list - IPs maliciosas (threat intel)
+# AustralPay lab ficticio.
+# Placeholder: se poblara en el Proyecto 4 (IOC enrichment con n8n) via el circuito de threat intel.
+# Formato: una IP (o CIDR) por linea, con dos puntos al final:
+#   203.0.113.10:

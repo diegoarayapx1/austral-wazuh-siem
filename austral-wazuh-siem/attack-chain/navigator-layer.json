@@ -1,0 +1,137 @@
+{
+  "name": "AustralPay INC-2026-001 - Cadena de intrusion",
+  "versions": {
+    "attack": "15",
+    "navigator": "4.9.1",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "Cadena de intrusion multi-etapa contra AustralPay (laboratorio ficticio). Coloreada por estado de deteccion: verde = detectado (alerta), ambar = contexto/parcial, rojo = gap (no detectado). Referencia: informe caso-INC-2026-001.",
+  "filters": {
+    "platforms": ["Windows", "Linux"]
+  },
+  "sorting": 0,
+  "layout": {
+    "layout": "side",
+    "aggregateFunction": "average",
+    "showID": true,
+    "showName": true,
+    "showAggregateScores": false,
+    "countUnscored": false
+  },
+  "hideDisabled": false,
+  "techniques": [
+    {
+      "techniqueID": "T1566",
+      "tactic": "initial-access",
+      "color": "#d69e2e",
+      "comment": "Phishing: .js senuelo (Factura-Pendiente-AustralPay.js). Vector de entrada. Detectado solo como contexto via la ejecucion downstream.",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1059.005",
+      "tactic": "execution",
+      "color": "#d69e2e",
+      "comment": "Visual Basic / script host: wscript ejecuta el .js y engendra powershell. Regla 92000, nivel 4 (contexto).",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1059.001",
+      "tactic": "execution",
+      "color": "#2f855a",
+      "comment": "PowerShell download-cradle (IEX + descarga remota). DETECTADO: regla custom 100210, nivel 12.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1547.001",
+      "tactic": "persistence",
+      "color": "#c53030",
+      "comment": "Registry Run Key 'AustralUpdater' (HKCU). GAP de regla: Sysmon EID 13 lo registra, Wazuh no lo promueve a alerta.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1552.001",
+      "tactic": "credential-access",
+      "color": "#c53030",
+      "comment": "Credenciales en texto plano (accesos-servidores.txt). GAP: leer un archivo no genera evento. Punto ciego total.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1110.001",
+      "tactic": "credential-access",
+      "color": "#2f855a",
+      "comment": "Brute force SSH (password guessing) contra soporte-pagos. DETECTADO: regla custom 100220, nivel 12 (correlacion fallo->exito).",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1046",
+      "tactic": "discovery",
+      "color": "#c53030",
+      "comment": "Network Service Discovery: Test-NetConnection a austral-app:22. GAP inherente (herramienta nativa).",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1018",
+      "tactic": "discovery",
+      "color": "#c53030",
+      "comment": "Remote System Discovery: barrido del segmento interno. GAP inherente.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1021.004",
+      "tactic": "lateral-movement",
+      "color": "#d69e2e",
+      "comment": "SSH lateral a austral-app. PARCIAL: variante brute force (6A) detectada por 100220; variante con credencial robada (6B) evade toda deteccion (login de rutina nivel 3).",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1078",
+      "tactic": "defense-evasion",
+      "color": "#c53030",
+      "comment": "Valid Accounts: credencial robada usada desde host interno confiable. GAP: indistinguible de actividad legitima; base del blind spot de la variante 6B.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1548.003",
+      "tactic": "privilege-escalation",
+      "color": "#2f855a",
+      "comment": "Sudo and Sudo Caching: escalada a root con credencial robada. DETECTADO: regla base 5402, nivel 3 (control auditado).",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1005",
+      "tactic": "collection",
+      "color": "#c53030",
+      "comment": "Data from Local System: lectura del transacciones.csv (cat). GAP: la lectura/exfiltracion no deja rastro.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1565.001",
+      "tactic": "impact",
+      "color": "#2f855a",
+      "comment": "Stored Data Manipulation: modificacion del transacciones.csv via sudo. DETECTADO: FIM whodata, regla 550 nivel 7, con atribucion completa (soporte-pagos -> sudo -> root).",
+      "enabled": true
+    }
+  ],
+  "gradient": {
+    "colors": ["#ff6666ff", "#ffe766ff", "#8ec843ff"],
+    "minValue": 0,
+    "maxValue": 100
+  },
+  "legendItems": [
+    {"label": "Detectado (genero alerta)", "color": "#2f855a"},
+    {"label": "Contexto / parcial", "color": "#d69e2e"},
+    {"label": "Gap (no detectado)", "color": "#c53030"}
+  ],
+  "metadata": [
+    {"name": "Incidente", "value": "INC-2026-001"},
+    {"name": "Ventana", "value": "2026-08-04 08:26-11:01 UTC"},
+    {"name": "Hosts", "value": "austral-ws01, austral-app"},
+    {"name": "Nota", "value": "AustralPay es un laboratorio ficticio"}
+  ],
+  "showTacticRowBackground": true,
+  "tacticRowBackground": "#1a2b45",
+  "selectTechniquesAcrossTactics": true,
+  "selectSubtechniquesWithParent": false
+}
