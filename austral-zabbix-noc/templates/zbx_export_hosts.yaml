@@ -1,0 +1,36 @@
+zabbix_export:
+  version: '7.0'
+  host_groups:
+    - uuid: 12c787188edd4f2fb078b34c62a5e4e1
+      name: AustralPay/Red
+  hosts:
+    - host: austral-net
+      name: austral-net
+      templates:
+        - name: 'Cisco IOS by SNMP'
+      groups:
+        - name: AustralPay/Red
+      interfaces:
+        - type: SNMP
+          ip: 192.168.1.75
+          port: '161'
+          details:
+            version: SNMPV3
+            securityname: '{$SNMPV3.USER}'
+            securitylevel: AUTHPRIV
+            authprotocol: SHA1
+            authpassphrase: '{$SNMPV3.AUTHPASS}'
+            privprotocol: AES128
+            privpassphrase: '{$SNMPV3.PRIVPASS}'
+            bulk: 'NO'
+          interface_ref: if1
+      macros:
+        - macro: '{$NET.IF.IFADMINSTATUS.NOT_MATCHES}'
+          value: ^$
+        - macro: '{$SNMPV3.AUTHPASS}'
+          type: SECRET_TEXT
+        - macro: '{$SNMPV3.PRIVPASS}'
+          type: SECRET_TEXT
+        - macro: '{$SNMPV3.USER}'
+          type: SECRET_TEXT
+      inventory_mode: DISABLED
